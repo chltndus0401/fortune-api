@@ -4,12 +4,13 @@ dotenv.config();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-export default async function handler(req, res) {
+export default function handler(req, res) {
   const allowedOrigins = [
     "https://chltndus0401.github.io",
     "https://assign2-zeta.vercel.app",
   ];
-  const origin=req.herders.origin;
+
+  const origin = req.headers.origin;
 
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
@@ -17,12 +18,22 @@ export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "null");
   }
 
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
+  // **중요**: OPTIONS 요청에 대해 바로 응답 종료
   if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     return res.status(200).end();
   }
+
+  if (req.method === "POST") {
+    // 실제 처리 로직
+    res.status(200).json({ message: "Success" });
+  } else {
+    res.status(405).json({ message: "Method Not Allowed" });
+  }
+}
+
 
   const { name, birth }=req.body;
   if (!name || !birth) {
