@@ -7,6 +7,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const allowedOrigins = [
   "https://api-five-wheat.vercel.app",
   "https://chltndus0401.github.io/api",
+  "https://assign2-iskowldkv-sooyeons-projects-6de6602a.vercel.app/",
   // 허용할 프론트 도메인 추가
 ];
 
