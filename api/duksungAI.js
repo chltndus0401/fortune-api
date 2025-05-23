@@ -9,11 +9,27 @@ const allowedOrigins = [
   "https://chltndus0401.github.io/api",
   // 허용할 프론트 도메인 추가
 ];
+
+const origin=req.headers.origin;
+
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    
+    res.setHeader("Access-Control-Allow-Origin", "null");
+  }
+  
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
+/*export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+*/
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
