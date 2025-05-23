@@ -6,12 +6,10 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const allowedOrigins = [
   "https://api-five-wheat.vercel.app",
-  "https://chltndus0401.github.io/api",
-  "https://assign2-iskowldkv-sooyeons-projects-6de6602a.vercel.app/",
+  "https://chltndus0401.github.io",
+  "https://assign2-iskowldkv-sooyeons-projects-6de6602a.vercel.app",
   // 허용할 프론트 도메인 추가
 ];
-
-const origin=req.headers.origin;
 
 export default async function handler(req, res) {
   const origin = req.headers.origin;
@@ -19,25 +17,19 @@ export default async function handler(req, res) {
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   } else {
-    
     res.setHeader("Access-Control-Allow-Origin", "null");
   }
-  
+
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-/*export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-*/
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  const { name, birth }=req.body;
+  const { name, birth } = req.body;
   if (!name || !birth) {
-    return res.status(400).json({ error: "이름(name)과 생년월일(birth)이 필요합니다"});
+    return res.status(400).json({ error: "이름(name)과 생년월일(birth)이 필요합니다" });
   }
 
   try {
@@ -49,7 +41,7 @@ export default async function handler(req, res) {
       오늘 날짜: ${today}
 
       이 사람의 오늘의 운세와 행운의 아이템을 사주풀이 형식으로 알려줘.
-      `;
+    `;
 
     const result = await ai.models.generateContent({
       model: "gemini-2.0-flash",
@@ -63,8 +55,6 @@ export default async function handler(req, res) {
     res.status(200).json({ answer: result.text });
   } catch (err) {
     console.error(err);
-    res.status(500).json({
-      error: "Gemini API 오류 발생",
-    });
+    res.status(500).json({ error: "Gemini API 오류 발생" });
   }
 }
