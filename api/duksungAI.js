@@ -8,11 +8,10 @@ const allowedOrigins = [
   "https://api-five-wheat.vercel.app",
   "https://chltndus0401.github.io",
   "https://assign2-iskowldkv-sooyeons-projects-6de6602a.vercel.app",
-  // 허용할 프론트 도메인 추가
 ];
 
 export default async function handler(req, res) {
-  const origin = req.headers.origin;
+  const origin = req.headers.origin || "";
 
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
