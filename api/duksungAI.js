@@ -8,11 +8,16 @@ export default async function handler(req, res) {
   const allowedOrigins = [
     "https://chltndus0401.github.io",
     "https://assign2-zeta.vercel.app",
+    "https://chltndus0401.github.io/fortune/",
   ];
+  const origin=req.herders.originl;
 
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "null");
   }
+
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
