@@ -4,8 +4,13 @@ dotenv.config();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+const allowedOrigins = [
+  "https://api-five-wheat.vercel.app",
+  "https://chltndus0401.github.io/api",
+  // 허용할 프론트 도메인 추가
+];
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "https://chltndus0401.github.io/fortune/");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
