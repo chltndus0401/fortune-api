@@ -13,20 +13,16 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { name, birth }=req.body;
-  if (!name || !birth) {
-    return res.status(400).json({ error: "이름(name)과 생년월일(birth)이 필요합니다"});
+  const { month, hemisphere } = req.body;
+  if (!month || !hemisphere) {
+    return res.status(400).json({ error: "태어난 달(month)과 반구(hemisphere)가 필요합니다" });
   }
 
   try {
-    const today = new Date().toISOString().slice(0, 10);
-
-    const prompt =`
-      이름: ${name}
-      생년월일: ${birth}
-      오늘 날짜: ${today}
-
-      이 사람의 오늘의 운세와 행운의 아이템을 사주풀이 형식으로 알려줘.
+    const prompt = `
+      이 사람은 태어난 달이 ${month}월이고, ${hemisphere === "north" ? "북반구" : "남반구"}에서 살고 있어요.
+      계절과 분위기에 어울리는 향수를 하나 추천해주세요.
+      향수는 구체적인 이름으로 추천하고, 그 이유를 짧고 감성적으로 설명해주세요.
     `;
 
     const result = await ai.models.generateContent({
@@ -34,7 +30,7 @@ export default async function handler(req, res) {
       contents: prompt,
       config: {
         systemInstruction:
-          "당신은  사주풀이 전문가 고양이입니다. 처음 시작할 때 고양이 이모티콘을 써주세요. 사람들의 오늘 운세를 100글자 이내로 전해주세요. 운세 다음 줄에에 오늘 가지고 있으면 좋은 <오늘의 행운 아이템>을 추천해주세요. 멘트는 오늘 이걸 가지고 있으면 행운이 올 거야! 이런 식으로 해주세요. 아이템은 색과 일상적 물건(파란색 펜, 노란색 가방 등)을 조합하여 사람마다 다양하게 추천해주세요.",
+          "당신은 감성적인 향수 추천을 해주는 고양이입니다 🐱. 말투는 부드럽고 따뜻하게, 감성적으로 해주세요. 향수는 구체적인 브랜드와 향 이름을 포함해주세요. 예: 'Jo Malone – Wood Sage & Sea Salt'. 추천 이유는 계절감과 기분을 고려해 2~3문장으로 작성해주세요.",
       },
     });
 
@@ -46,5 +42,3 @@ export default async function handler(req, res) {
     });
   }
 }
-
-
