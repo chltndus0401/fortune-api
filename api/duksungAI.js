@@ -1,6 +1,8 @@
-// /api/duksungAI.js
+import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 dotenv.config();
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const perfumeDB = {
   spring: [
@@ -86,10 +88,7 @@ const perfumeDB = {
 };
 
 function getSeason(month, hemisphere) {
-  // 북반구 기준 계절 (3-5 봄, 6-8 여름, 9-11 가을, 12-2 겨울)
-  // 남반구는 반대로 (9-11 봄, 12-2 여름, 3-5 가을, 6-8 겨울)
   const m = Number(month);
-
   if (hemisphere === "north") {
     if ([3, 4, 5].includes(m)) return "spring";
     if ([6, 7, 8].includes(m)) return "summer";
@@ -101,7 +100,6 @@ function getSeason(month, hemisphere) {
     if ([3, 4, 5].includes(m)) return "autumn";
     if ([6, 7, 8].includes(m)) return "winter";
   }
-  // 기본 겨울
   return "winter";
 }
 
@@ -115,6 +113,7 @@ export default async function handler(req, res) {
   }
 
   const { month, hemisphere } = req.body;
+
   if (!month || !hemisphere) {
     return res.status(400).json({ error: "달(month)과 반구(hemisphere)가 필요합니다." });
   }
@@ -132,8 +131,29 @@ export default async function handler(req, res) {
     const perfumes = perfumeDB[season];
     const chosen = perfumes[Math.floor(Math.random() * perfumes.length)];
 
-    const answer = `
-🐱 야옹~ 오늘의 향기는 바로 이거야!
+    const prompt = `
+당신은 조향사 고양이입니다. 아래 향수 정보를 참고해서 감성적이고 매력적인 추천 문구를 작성해주세요.
+
+향수 이름: ${chosen.name}
+톱노트: ${chosen.top}
+미들노트: ${chosen.middle}
+베이스노트: ${chosen.base}
+
+추천 멘트 (고양이 이모티콘 포함, 따뜻하고 귀여운 느낌):
+`;
+
+    const result = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+      config: {
+        systemInstruction:
+          "당신은 조향사 고양이입니다. 향수 추천을 따뜻하고 귀엽게 해주세요. 고양이 이모티콘을 사용하고, 추천 문장은 100자 이내로 작성해주세요.",
+      },
+    });
+
+    const aiText = result.text.trim();
+
+    const answer = `🐱 야옹~ 오늘의 향기는 바로 이거야!
 
 ✨ "${chosen.name}" ✨
 
@@ -141,13 +161,13 @@ export default async function handler(req, res) {
 🌸 미들노트: ${chosen.middle}  
 🌿 베이스노트: ${chosen.base}
 
-오늘은 이 향기를 살며시 묻히고 하루를 걸어봐.  
-행운이 네 곁에 따르냥~ 🐾
-`;
+${aiText}
+
+행운이 네 곁에 따르냥~ 🐾`;
 
     res.status(200).json({ answer });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "서버 오류가 발생했어요." });
+    res.status(500).json({ error: "Gemini API 오류 발생" });
   }
 }
