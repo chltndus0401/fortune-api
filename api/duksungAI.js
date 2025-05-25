@@ -1,11 +1,7 @@
-// /api/duksungAI.js (또는 .ts)
-import { GoogleGenAI } from "@google/genai";
+// /api/duksungAI.js
 import dotenv from "dotenv";
 dotenv.config();
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-// 예시 향수 DB (더 많이 추가해서 다양하게 추천하세요)
 const perfumeDB = {
   spring: [
     {
@@ -19,6 +15,12 @@ const perfumeDB = {
       top: "베르가못, 배",
       middle: "재스민, 장미",
       base: "바닐라, 샌달우드",
+    },
+    {
+      name: "Gucci Bloom",
+      top: "재스민, 튜베로즈",
+      middle: "랭구스틴, 오렌지 꽃",
+      base: "머스크",
     },
   ],
   summer: [
@@ -34,6 +36,12 @@ const perfumeDB = {
       middle: "바질, 페퍼",
       base: "베티버, 앰버우드",
     },
+    {
+      name: "Acqua di Gioia",
+      top: "민트, 레몬",
+      middle: "자스민, 피오니",
+      base: "설탕, 시더우드",
+    },
   ],
   autumn: [
     {
@@ -47,6 +55,12 @@ const perfumeDB = {
       top: "커피, 배",
       middle: "자스민, 오렌지 블라썸",
       base: "바닐라, 패출리",
+    },
+    {
+      name: "Maison Margiela Replica Jazz Club",
+      top: "레몬, 자몽",
+      middle: "자스민, 계피",
+      base: "바닐라, 토바코 잎",
     },
   ],
   winter: [
@@ -62,14 +76,33 @@ const perfumeDB = {
       middle: "캐시미어 우드",
       base: "바닐라, 머스크",
     },
+    {
+      name: "Calvin Klein Euphoria",
+      top: "석류, 청사과",
+      middle: "오키드, 크림",
+      base: "샌달우드, 앰버",
+    },
   ],
 };
 
-function getSeason(month) {
-  if ([3, 4, 5].includes(month)) return "spring";
-  if ([6, 7, 8].includes(month)) return "summer";
-  if ([9, 10, 11].includes(month)) return "autumn";
-  return "winter"; // 12,1,2월은 겨울
+function getSeason(month, hemisphere) {
+  // 북반구 기준 계절 (3-5 봄, 6-8 여름, 9-11 가을, 12-2 겨울)
+  // 남반구는 반대로 (9-11 봄, 12-2 여름, 3-5 가을, 6-8 겨울)
+  const m = Number(month);
+
+  if (hemisphere === "north") {
+    if ([3, 4, 5].includes(m)) return "spring";
+    if ([6, 7, 8].includes(m)) return "summer";
+    if ([9, 10, 11].includes(m)) return "autumn";
+    return "winter";
+  } else if (hemisphere === "south") {
+    if ([9, 10, 11].includes(m)) return "spring";
+    if ([12, 1, 2].includes(m)) return "summer";
+    if ([3, 4, 5].includes(m)) return "autumn";
+    if ([6, 7, 8].includes(m)) return "winter";
+  }
+  // 기본 겨울
+  return "winter";
 }
 
 export default async function handler(req, res) {
@@ -90,9 +123,12 @@ export default async function handler(req, res) {
   if (isNaN(m) || m < 1 || m > 12) {
     return res.status(400).json({ error: "올바른 달(month)을 입력하세요 (1~12)." });
   }
+  if (!["north", "south"].includes(hemisphere)) {
+    return res.status(400).json({ error: "반구(hemisphere)는 'north' 또는 'south'이어야 합니다." });
+  }
 
   try {
-    const season = getSeason(m);
+    const season = getSeason(m, hemisphere);
     const perfumes = perfumeDB[season];
     const chosen = perfumes[Math.floor(Math.random() * perfumes.length)];
 
